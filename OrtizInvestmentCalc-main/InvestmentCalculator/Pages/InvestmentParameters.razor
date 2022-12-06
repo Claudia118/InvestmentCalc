@@ -1,0 +1,68 @@
+﻿@page "/investment/{Id:int}"
+@page "/investment"
+@inject InvestmentCalculator.Data.Interfaces.IInvestmentCalcRepo Repo
+@using InvestmentCalculator.Data.Interfaces
+@using InvestmentCalculator.Data.Models
+@inject NavigationManager NavManager
+@inject IInvestmentCalcRepo repo 
+
+<h3>Investment Parameters</h3>
+
+@if(investments == null || investments.Count == 0)
+{
+    <p>No investment to show yet.</p>
+}
+else
+{
+    <p>
+        <label for="principleInput">Principle:</label>
+        <input type="text" id="principleInput" class="form-control" @bind="Investment.Principal"/>
+    </p>
+    <p>
+        <label for="interestInput">Interest:</label>
+        <input type="text" id="interestInput" class="form-control" @bind="Investment.Interest"/>
+    </p>
+    <p>
+        <label for="yearsInput">Years:</label>
+        <input type="text" id="yearsInput" class="form-control" @bind="Investment.Years"/>
+    </p>
+     <p>
+        <label for="compoundInput">Compounds:</label>
+        <input type="text" id="compoundInput" class="form-control" @bind="Investment.Compounds"/>
+    </p>
+    <p>
+        <button type="button" class="btn btn-primary" @onclick="OnAddButtonClickAsync">Submit</button>
+    </p>
+
+    <p>@message</p>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; } = 0;
+
+    List<InvestmentCalc>? investments{ get; set; }
+
+    public InvestmentCalc? Investment { get; set; } 
+    public string? message { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        investments = await Repo.GetInvestmentCalcsAsync();
+    }
+
+    //protected async override Task OnParametersSetAsync()
+    //{
+    //    await base.OnParametersSetAsync();
+
+    //    Investment = await Repo.GetInvestmentCalcAsync(Id);
+    //}
+
+    //Method for submit button to go to the summary page
+    private async void OnAddButtonClickAsync()
+    {
+        await Repo.SaveInvestmentCalcAsync(Investment);
+        NavManager.NavigateTo("/summary");
+    }
+}

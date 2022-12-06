@@ -1,0 +1,59 @@
+﻿@page "/summary"
+@inject InvestmentCalculator.Data.Interfaces.IInvestmentCalcRepo Repo
+@using InvestmentCalculator.Data.Interfaces
+@using InvestmentCalculator.Data.Models
+@inject NavigationManager NavManager
+<h3>Edit Investment</h3>
+
+@if(investments == null || investments.Count == 0)
+{
+    <p>No investment to show yet.</p>
+}
+else
+{
+    
+    <ul>
+        @foreach(var invest in investments)
+        {
+            <li>
+               Principal: @invest.Principal 
+               Years: @invest.Years 
+               Interest: @invest.Interest 
+               Compounds: @invest.Compounds
+               Future Value:@invest.Full <button class="btn btn-secondary" @onclick="()=>OnEditButtonClick(invest)">Edit</button> <button class="btn btn-danger" @onclick="()=>OnDeleteButtonClick(invest)">Delete</button>
+            </li>
+        }
+    </ul>
+     <p>
+        <button type="button" class="btn btn-primary" @onclick="OnSummaryClick">Calculate a new investment</button>
+    </p>
+}
+
+@code {
+    List<InvestmentCalc>? investments{ get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        investments = await Repo.GetInvestmentCalcsAsync();
+    }
+
+    //Method to return to the investment page
+    private void OnSummaryClick()
+    {
+        NavManager.NavigateTo("/investment");
+    }
+
+    //Method to delete items from Investment
+    private async void OnDeleteButtonClick(InvestmentCalc invest)
+    {
+        await Repo.DeleteInvestmentCalcAsync(invest);
+        investments?.Remove(invest);
+
+    }
+
+    private async void OnEditButtonClick(InvestmentCalc invest)
+    {
+         NavManager.NavigateTo($"/investment/{invest.Id}");
+    }
+}
